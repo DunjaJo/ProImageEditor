@@ -1,0 +1,764 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pro Image Editor</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="app-shell">
+        <aside class="sidebar">
+            <div class="sidebar-inner">
+                <div class="brand">
+                    <div class="brand-badge">PI</div>
+                    <div>
+                        <h1>Pro Image Editor</h1>
+                        <p>Real-time image editing with live preview</p>
+                    </div>
+                </div>
+
+                <div id="errorBox" class="error-box hidden"></div>
+
+                <div class="panel">
+                    <details class="accordion" open>
+                        <summary>Upload</summary>
+                        <div class="accordion-content">
+                            <label class="upload-box" for="imageInput" id="dropZone">
+                                <span class="upload-title">Upload Image</span>
+                                <span class="upload-subtitle">Click or drag & drop an image here</span>
+                                <input type="file" id="imageInput" accept=".png,.jpg,.jpeg,.webp">
+                            </label>
+                        </div>
+                    </details>
+
+                    <details class="accordion" open>
+                        <summary>Resize</summary>
+                        <div class="accordion-content">
+                            <div class="control-block">
+                                <label for="resizePreset">Preset</label>
+                                <select id="resizePreset">
+                                    <option value="original" selected>Original Size</option>
+                                    <option value="instagram_post">Instagram Post (1080×1080)</option>
+                                    <option value="instagram_story">Instagram Story (1080×1920)</option>
+                                    <option value="youtube_thumbnail">YouTube Thumbnail (1280×720)</option>
+                                    <option value="facebook_post">Facebook Post (1200×630)</option>
+                                    <option value="square_small">Square Small (800×800)</option>
+                                    <option value="custom">Custom Size</option>
+                                </select>
+                            </div>
+
+                            <div class="double-controls">
+                                <div class="control-block">
+                                    <label for="customWidth">Custom Width</label>
+                                    <input type="number" id="customWidth" class="text-input" placeholder="e.g. 1200" min="1">
+                                </div>
+
+                                <div class="control-block">
+                                    <label for="customHeight">Custom Height</label>
+                                    <input type="number" id="customHeight" class="text-input" placeholder="e.g. 800" min="1">
+                                </div>
+                            </div>
+                        </div>
+                    </details>
+
+                    <details class="accordion" open>
+                        <summary>Crop</summary>
+                        <div class="accordion-content">
+                            <div class="double-controls">
+                                <div class="control-block">
+                                    <label for="cropX">Crop X</label>
+                                    <input type="number" id="cropX" class="text-input" placeholder="0" min="0">
+                                </div>
+                                <div class="control-block">
+                                    <label for="cropY">Crop Y</label>
+                                    <input type="number" id="cropY" class="text-input" placeholder="0" min="0">
+                                </div>
+                            </div>
+
+                            <div class="double-controls">
+                                <div class="control-block">
+                                    <label for="cropW">Crop Width</label>
+                                    <input type="number" id="cropW" class="text-input" placeholder="e.g. 600" min="0">
+                                </div>
+                                <div class="control-block">
+                                    <label for="cropH">Crop Height</label>
+                                    <input type="number" id="cropH" class="text-input" placeholder="e.g. 400" min="0">
+                                </div>
+                            </div>
+
+                            <p class="helper-text">
+                                Enter crop area in pixels. Leave width and height empty or 0 to disable cropping.
+                            </p>
+                        </div>
+                    </details>
+
+                    <details class="accordion" open>
+                        <summary>Presets</summary>
+                        <div class="accordion-content">
+                            <div class="preset-grid">
+                                <label class="preset-card">
+                                    <input type="radio" name="preset" value="none" checked>
+                                    <span>None</span>
+                                </label>
+                                <label class="preset-card">
+                                    <input type="radio" name="preset" value="vivid">
+                                    <span>Vivid</span>
+                                </label>
+                                <label class="preset-card">
+                                    <input type="radio" name="preset" value="cinematic">
+                                    <span>Cinematic</span>
+                                </label>
+                                <label class="preset-card">
+                                    <input type="radio" name="preset" value="vintage">
+                                    <span>Vintage</span>
+                                </label>
+                                <label class="preset-card">
+                                    <input type="radio" name="preset" value="cool">
+                                    <span>Cool</span>
+                                </label>
+                            </div>
+                        </div>
+                    </details>
+
+                    <details class="accordion" open>
+                        <summary>Filters</summary>
+                        <div class="accordion-content">
+                            <div class="filter-grid">
+                                <label class="filter-card"><input type="radio" name="filter" value="none" checked><span>Original</span></label>
+                                <label class="filter-card"><input type="radio" name="filter" value="grayscale"><span>Grayscale</span></label>
+                                <label class="filter-card"><input type="radio" name="filter" value="blur"><span>Blur</span></label>
+                                <label class="filter-card"><input type="radio" name="filter" value="edges"><span>Edges</span></label>
+                                <label class="filter-card"><input type="radio" name="filter" value="sharpen"><span>Sharpen</span></label>
+                                <label class="filter-card"><input type="radio" name="filter" value="sepia"><span>Sepia</span></label>
+                                <label class="filter-card"><input type="radio" name="filter" value="invert"><span>Invert</span></label>
+                                <label class="filter-card"><input type="radio" name="filter" value="emboss"><span>Emboss</span></label>
+                                <label class="filter-card"><input type="radio" name="filter" value="cartoon"><span>Cartoon</span></label>
+                                <label class="filter-card"><input type="radio" name="filter" value="warm"><span>Warm Tone</span></label>
+                            </div>
+                        </div>
+                    </details>
+
+                    <details class="accordion" open>
+                        <summary>Adjustments</summary>
+                        <div class="accordion-content">
+                            <div class="control-block">
+                                <div class="label-row">
+                                    <label for="brightness">Brightness</label>
+                                    <span id="brightnessValue">0</span>
+                                </div>
+                                <input type="range" id="brightness" min="-100" max="100" value="0">
+                            </div>
+
+                            <div class="control-block">
+                                <div class="label-row">
+                                    <label for="contrast">Contrast</label>
+                                    <span id="contrastValue">1.0</span>
+                                </div>
+                                <input type="range" id="contrast" min="0.5" max="3" step="0.1" value="1">
+                            </div>
+
+                            <div class="control-block">
+                                <div class="label-row">
+                                    <label for="saturation">Saturation</label>
+                                    <span id="saturationValue">1.0</span>
+                                </div>
+                                <input type="range" id="saturation" min="0" max="3" step="0.1" value="1">
+                            </div>
+
+                            <div class="control-block">
+                                <div class="label-row">
+                                    <label for="blurStrength">Blur Strength</label>
+                                    <span id="blurStrengthValue">15</span>
+                                </div>
+                                <input type="range" id="blurStrength" min="1" max="41" step="2" value="15">
+                            </div>
+
+                            <div class="control-block">
+                                <div class="label-row">
+                                    <label for="sharpenStrength">Sharpen Strength</label>
+                                    <span id="sharpenStrengthValue">0.0</span>
+                                </div>
+                                <input type="range" id="sharpenStrength" min="0" max="5" step="0.5" value="0">
+                            </div>
+                        </div>
+                    </details>
+
+                    <details class="accordion" open>
+                        <summary>Transform</summary>
+                        <div class="accordion-content">
+                            <div class="double-controls">
+                                <div class="control-block">
+                                    <label for="rotate">Rotate</label>
+                                    <select id="rotate">
+                                        <option value="none">None</option>
+                                        <option value="left">Left 90°</option>
+                                        <option value="right">Right 90°</option>
+                                        <option value="180">180°</option>
+                                    </select>
+                                </div>
+
+                                <div class="control-block">
+                                    <label for="flip">Flip</label>
+                                    <select id="flip">
+                                        <option value="none">None</option>
+                                        <option value="horizontal">Horizontal</option>
+                                        <option value="vertical">Vertical</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </details>
+
+                    <details class="accordion" open>
+                        <summary>Text Overlay</summary>
+                        <div class="accordion-content">
+                            <div class="control-block">
+                                <label for="overlayText">Text</label>
+                                <input type="text" id="overlayText" class="text-input" placeholder="Enter your text">
+                            </div>
+
+                            <div class="double-controls">
+                                <div class="control-block">
+                                    <label for="textSize">Text Size</label>
+                                    <select id="textSize">
+                                        <option value="0.7">Small</option>
+                                        <option value="1" selected>Medium</option>
+                                        <option value="1.5">Large</option>
+                                        <option value="2">Extra Large</option>
+                                    </select>
+                                </div>
+
+                                <div class="control-block">
+                                    <label for="textColor">Text Color</label>
+                                    <select id="textColor">
+                                        <option value="white" selected>White</option>
+                                        <option value="black">Black</option>
+                                        <option value="red">Red</option>
+                                        <option value="green">Green</option>
+                                        <option value="blue">Blue</option>
+                                        <option value="yellow">Yellow</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="control-block">
+                                <label for="textPosition">Text Position</label>
+                                <select id="textPosition">
+                                    <option value="top-left">Top Left</option>
+                                    <option value="top-right">Top Right</option>
+                                    <option value="center">Center</option>
+                                    <option value="bottom-left">Bottom Left</option>
+                                    <option value="bottom-right" selected>Bottom Right</option>
+                                </select>
+                            </div>
+                        </div>
+                    </details>
+
+                    <details class="accordion" open>
+                        <summary>Watermark</summary>
+                        <div class="accordion-content">
+                            <div class="control-block">
+                                <label for="watermarkText">Watermark Text</label>
+                                <input type="text" id="watermarkText" class="text-input" placeholder="Enter watermark text">
+                            </div>
+
+                            <div class="double-controls">
+                                <div class="control-block">
+                                    <label for="watermarkSize">Watermark Size</label>
+                                    <select id="watermarkSize">
+                                        <option value="0.5">Small</option>
+                                        <option value="0.8" selected>Medium</option>
+                                        <option value="1.2">Large</option>
+                                        <option value="1.6">Extra Large</option>
+                                    </select>
+                                </div>
+
+                                <div class="control-block">
+                                    <label for="watermarkColor">Watermark Color</label>
+                                    <select id="watermarkColor">
+                                        <option value="white" selected>White</option>
+                                        <option value="black">Black</option>
+                                        <option value="gray">Gray</option>
+                                        <option value="red">Red</option>
+                                        <option value="blue">Blue</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="double-controls">
+                                <div class="control-block">
+                                    <label for="watermarkPosition">Watermark Position</label>
+                                    <select id="watermarkPosition">
+                                        <option value="top-left">Top Left</option>
+                                        <option value="top-right">Top Right</option>
+                                        <option value="center">Center</option>
+                                        <option value="bottom-left">Bottom Left</option>
+                                        <option value="bottom-right" selected>Bottom Right</option>
+                                    </select>
+                                </div>
+
+                                <div class="control-block">
+                                    <div class="label-row">
+                                        <label for="watermarkOpacity">Opacity</label>
+                                        <span id="watermarkOpacityValue">0.35</span>
+                                    </div>
+                                    <input type="range" id="watermarkOpacity" min="0.1" max="1" step="0.05" value="0.35">
+                                </div>
+                            </div>
+                        </div>
+                    </details>
+
+                    <details class="accordion" open>
+                        <summary>Export</summary>
+                        <div class="accordion-content">
+                            <div class="double-controls">
+                                <div class="control-block">
+                                    <label for="exportFormat">Format</label>
+                                    <select id="exportFormat">
+                                        <option value="jpg" selected>JPG</option>
+                                        <option value="png">PNG</option>
+                                        <option value="webp">WEBP</option>
+                                    </select>
+                                </div>
+
+                                <div class="control-block">
+                                    <div class="label-row">
+                                        <label for="exportQuality">Quality</label>
+                                        <span id="exportQualityValue">95</span>
+                                    </div>
+                                    <input type="range" id="exportQuality" min="10" max="100" step="1" value="95">
+                                </div>
+                            </div>
+                        </div>
+                    </details>
+
+                    <div class="button-group sticky-actions">
+                        <button id="resetBtn" class="secondary-btn" type="button">Reset Controls</button>
+                        <a href="/download" class="download-btn">Download Result</a>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <main class="workspace">
+            <div class="workspace-sticky">
+                <div class="workspace-hero">
+                    <div>
+                        <h2>Advanced Editing Workspace</h2>
+                        <p>Edit, compare, crop, resize, brand, and export images in real time.</p>
+                    </div>
+                    <div class="status-pill status-waiting" id="statusText">Waiting for image</div>
+                </div>
+
+                <div class="preview-layout single-preview">
+                    <div class="preview-card full-width-card">
+                        <div class="preview-header">
+                            <h3>Before / After Comparison</h3>
+                            <span class="preview-subtitle">Drag the divider to compare original and edited output.</span>
+                        </div>
+
+                        <div class="image-stage comparison-container">
+                            <img id="originalPreview" class="base-image" alt="Original image">
+
+                            <div id="overlay" class="overlay">
+                                <img id="resultPreview" class="overlay-image" alt="Processed result">
+                            </div>
+
+                            <div id="sliderLine" class="slider-line"></div>
+                            <input type="range" id="sliderControl" class="slider-control" min="0" max="100" value="50">
+
+                            <div id="originalPlaceholder" class="placeholder">
+                                <div class="empty-state">
+                                    <div class="empty-icon">🖼️</div>
+                                    <h4>Start by uploading an image</h4>
+                                    <p>Then use filters, text, watermark, crop, resize and export tools to edit it live.</p>
+                                </div>
+                            </div>
+
+                            <div id="loadingOverlay" class="loading-overlay hidden">
+                                <div class="loading-box">
+                                    <div class="spinner"></div>
+                                    <span>Processing image...</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="comparison-labels">
+                            <span>Original</span>
+                            <span>Edited</span>
+                        </div>
+
+                        <div class="info-panel">
+                            <div class="info-card">
+                                <span class="info-label">Original Size</span>
+                                <span class="info-value" id="originalSizeInfo">—</span>
+                            </div>
+                            <div class="info-card">
+                                <span class="info-label">Processed Size</span>
+                                <span class="info-value" id="processedSizeInfo">—</span>
+                            </div>
+                            <div class="info-card">
+                                <span class="info-label">Input Format</span>
+                                <span class="info-value" id="inputFormatInfo">—</span>
+                            </div>
+                            <div class="info-card">
+                                <span class="info-label">Export Format</span>
+                                <span class="info-value" id="exportFormatInfo">—</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        const imageInput = document.getElementById("imageInput");
+        const dropZone = document.getElementById("dropZone");
+
+        const resizePreset = document.getElementById("resizePreset");
+        const customWidth = document.getElementById("customWidth");
+        const customHeight = document.getElementById("customHeight");
+
+        const cropX = document.getElementById("cropX");
+        const cropY = document.getElementById("cropY");
+        const cropW = document.getElementById("cropW");
+        const cropH = document.getElementById("cropH");
+
+        const brightness = document.getElementById("brightness");
+        const contrast = document.getElementById("contrast");
+        const saturation = document.getElementById("saturation");
+        const blurStrength = document.getElementById("blurStrength");
+        const sharpenStrength = document.getElementById("sharpenStrength");
+        const rotate = document.getElementById("rotate");
+        const flip = document.getElementById("flip");
+        const resetBtn = document.getElementById("resetBtn");
+
+        const overlayText = document.getElementById("overlayText");
+        const textSize = document.getElementById("textSize");
+        const textColor = document.getElementById("textColor");
+        const textPosition = document.getElementById("textPosition");
+
+        const watermarkText = document.getElementById("watermarkText");
+        const watermarkSize = document.getElementById("watermarkSize");
+        const watermarkColor = document.getElementById("watermarkColor");
+        const watermarkPosition = document.getElementById("watermarkPosition");
+        const watermarkOpacity = document.getElementById("watermarkOpacity");
+
+        const exportFormat = document.getElementById("exportFormat");
+        const exportQuality = document.getElementById("exportQuality");
+
+        const brightnessValue = document.getElementById("brightnessValue");
+        const contrastValue = document.getElementById("contrastValue");
+        const saturationValue = document.getElementById("saturationValue");
+        const blurStrengthValue = document.getElementById("blurStrengthValue");
+        const sharpenStrengthValue = document.getElementById("sharpenStrengthValue");
+        const exportQualityValue = document.getElementById("exportQualityValue");
+        const watermarkOpacityValue = document.getElementById("watermarkOpacityValue");
+
+        const originalSizeInfo = document.getElementById("originalSizeInfo");
+        const processedSizeInfo = document.getElementById("processedSizeInfo");
+        const inputFormatInfo = document.getElementById("inputFormatInfo");
+        const exportFormatInfo = document.getElementById("exportFormatInfo");
+
+        const originalPreview = document.getElementById("originalPreview");
+        const resultPreview = document.getElementById("resultPreview");
+        const originalPlaceholder = document.getElementById("originalPlaceholder");
+        const loadingOverlay = document.getElementById("loadingOverlay");
+        const errorBox = document.getElementById("errorBox");
+        const statusText = document.getElementById("statusText");
+
+        const sliderControl = document.getElementById("sliderControl");
+        const overlay = document.getElementById("overlay");
+        const sliderLine = document.getElementById("sliderLine");
+
+        let debounceTimer = null;
+
+        function getSelectedFilter() {
+            const selected = document.querySelector('input[name="filter"]:checked');
+            return selected ? selected.value : "none";
+        }
+
+        function getSelectedPreset() {
+            const selected = document.querySelector('input[name="preset"]:checked');
+            return selected ? selected.value : "none";
+        }
+
+        function setStatus(text, type = "waiting") {
+            statusText.textContent = text;
+            statusText.className = `status-pill status-${type}`;
+        }
+
+        function updateValueLabels() {
+            brightnessValue.textContent = brightness.value;
+            contrastValue.textContent = Number(contrast.value).toFixed(1);
+            saturationValue.textContent = Number(saturation.value).toFixed(1);
+            blurStrengthValue.textContent = blurStrength.value;
+            sharpenStrengthValue.textContent = Number(sharpenStrength.value).toFixed(1);
+            exportQualityValue.textContent = exportQuality.value;
+            watermarkOpacityValue.textContent = Number(watermarkOpacity.value).toFixed(2);
+        }
+
+        function updateComparisonSlider() {
+            const value = sliderControl.value;
+            overlay.style.width = value + "%";
+            sliderLine.style.left = value + "%";
+        }
+
+        function updateInfoPanel(info) {
+            originalSizeInfo.textContent = `${info.original_width} × ${info.original_height}`;
+            processedSizeInfo.textContent = `${info.processed_width} × ${info.processed_height}`;
+            inputFormatInfo.textContent = info.input_format;
+            exportFormatInfo.textContent = info.export_format;
+        }
+
+        function resetInfoPanel() {
+            originalSizeInfo.textContent = "—";
+            processedSizeInfo.textContent = "—";
+            inputFormatInfo.textContent = "—";
+            exportFormatInfo.textContent = "—";
+        }
+
+        function showError(message) {
+            errorBox.textContent = message;
+            errorBox.classList.remove("hidden");
+        }
+
+        function hideError() {
+            errorBox.classList.add("hidden");
+            errorBox.textContent = "";
+        }
+
+        async function processImage() {
+            const file = imageInput.files[0];
+            if (!file) return;
+
+            hideError();
+            loadingOverlay.classList.remove("hidden");
+            setStatus("Processing...", "processing");
+
+            const formData = new FormData();
+            formData.append("image", file);
+            formData.append("resize_preset", resizePreset.value);
+            formData.append("custom_width", customWidth.value || 0);
+            formData.append("custom_height", customHeight.value || 0);
+
+            formData.append("crop_x", cropX.value || 0);
+            formData.append("crop_y", cropY.value || 0);
+            formData.append("crop_w", cropW.value || 0);
+            formData.append("crop_h", cropH.value || 0);
+
+            formData.append("filter", getSelectedFilter());
+            formData.append("preset", getSelectedPreset());
+            formData.append("brightness", brightness.value);
+            formData.append("contrast", contrast.value);
+            formData.append("saturation", saturation.value);
+            formData.append("blur_strength", blurStrength.value);
+            formData.append("sharpen_strength", sharpenStrength.value);
+            formData.append("rotate", rotate.value);
+            formData.append("flip", flip.value);
+
+            formData.append("overlay_text", overlayText.value);
+            formData.append("text_size", textSize.value);
+            formData.append("text_color", textColor.value);
+            formData.append("text_position", textPosition.value);
+
+            formData.append("watermark_text", watermarkText.value);
+            formData.append("watermark_size", watermarkSize.value);
+            formData.append("watermark_color", watermarkColor.value);
+            formData.append("watermark_position", watermarkPosition.value);
+            formData.append("watermark_opacity", watermarkOpacity.value);
+
+            formData.append("export_format", exportFormat.value);
+            formData.append("export_quality", exportQuality.value);
+
+            try {
+                const response = await fetch("/process", {
+                    method: "POST",
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    showError(data.error || "Something went wrong.");
+                    setStatus("Error", "error");
+                    return;
+                }
+
+                originalPreview.src = data.original_image + "?t=" + Date.now();
+                resultPreview.src = data.result_image + "?t=" + Date.now();
+
+                originalPreview.onload = () => {
+                    originalPreview.style.display = "block";
+                };
+
+                resultPreview.onload = () => {
+                    resultPreview.style.display = "block";
+                    originalPlaceholder.classList.add("hidden");
+                    setStatus("Live preview updated", "success");
+                    updateComparisonSlider();
+                };
+
+                resultPreview.onerror = () => {
+                    showError("Processed image could not be displayed.");
+                    setStatus("Preview error", "error");
+                };
+
+                if (data.info) {
+                    updateInfoPanel(data.info);
+                }
+
+            } catch (error) {
+                showError("Server connection error.");
+                setStatus("Connection error", "error");
+            } finally {
+                loadingOverlay.classList.add("hidden");
+            }
+        }
+
+        function debouncedProcess() {
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(processImage, 250);
+        }
+
+        imageInput.addEventListener("change", () => {
+            const file = imageInput.files[0];
+            if (file) {
+                const previewURL = URL.createObjectURL(file);
+                originalPreview.src = previewURL;
+                originalPreview.style.display = "block";
+                originalPlaceholder.classList.add("hidden");
+                setStatus("Image loaded", "success");
+                updateComparisonSlider();
+                processImage();
+            } else {
+                resetInfoPanel();
+                setStatus("Waiting for image", "waiting");
+            }
+        });
+
+        dropZone.addEventListener("dragover", (e) => {
+            e.preventDefault();
+            dropZone.classList.add("dragover");
+        });
+
+        dropZone.addEventListener("dragleave", () => {
+            dropZone.classList.remove("dragover");
+        });
+
+        dropZone.addEventListener("drop", (e) => {
+            e.preventDefault();
+            dropZone.classList.remove("dragover");
+
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                imageInput.files = files;
+                imageInput.dispatchEvent(new Event("change"));
+            }
+        });
+
+        [resizePreset, customWidth, customHeight, cropX, cropY, cropW, cropH].forEach((control) => {
+            control.addEventListener("input", debouncedProcess);
+            control.addEventListener("change", debouncedProcess);
+        });
+
+        document.querySelectorAll('input[name="filter"]').forEach((item) => {
+            item.addEventListener("change", debouncedProcess);
+        });
+
+        document.querySelectorAll('input[name="preset"]').forEach((item) => {
+            item.addEventListener("change", debouncedProcess);
+        });
+
+        [brightness, contrast, saturation, blurStrength, sharpenStrength].forEach((slider) => {
+            slider.addEventListener("input", () => {
+                updateValueLabels();
+                debouncedProcess();
+            });
+        });
+
+        [rotate, flip].forEach((control) => {
+            control.addEventListener("change", debouncedProcess);
+        });
+
+        [overlayText, textSize, textColor, textPosition].forEach((control) => {
+            control.addEventListener("input", debouncedProcess);
+            control.addEventListener("change", debouncedProcess);
+        });
+
+        [watermarkText, watermarkSize, watermarkColor, watermarkPosition, watermarkOpacity].forEach((control) => {
+            control.addEventListener("input", () => {
+                updateValueLabels();
+                debouncedProcess();
+            });
+            control.addEventListener("change", () => {
+                updateValueLabels();
+                debouncedProcess();
+            });
+        });
+
+        [exportFormat, exportQuality].forEach((control) => {
+            control.addEventListener("input", () => {
+                updateValueLabels();
+                debouncedProcess();
+            });
+            control.addEventListener("change", () => {
+                updateValueLabels();
+                debouncedProcess();
+            });
+        });
+
+        sliderControl.addEventListener("input", updateComparisonSlider);
+
+        resetBtn.addEventListener("click", () => {
+            resizePreset.value = "original";
+            customWidth.value = "";
+            customHeight.value = "";
+
+            cropX.value = "";
+            cropY.value = "";
+            cropW.value = "";
+            cropH.value = "";
+
+            brightness.value = 0;
+            contrast.value = 1;
+            saturation.value = 1;
+            blurStrength.value = 15;
+            sharpenStrength.value = 0;
+            rotate.value = "none";
+            flip.value = "none";
+
+            overlayText.value = "";
+            textSize.value = "1";
+            textColor.value = "white";
+            textPosition.value = "bottom-right";
+
+            watermarkText.value = "";
+            watermarkSize.value = "0.8";
+            watermarkColor.value = "white";
+            watermarkPosition.value = "bottom-right";
+            watermarkOpacity.value = "0.35";
+
+            exportFormat.value = "jpg";
+            exportQuality.value = 95;
+            sliderControl.value = 50;
+
+            document.querySelector('input[name="filter"][value="none"]').checked = true;
+            document.querySelector('input[name="preset"][value="none"]').checked = true;
+
+            updateValueLabels();
+            updateComparisonSlider();
+            resetInfoPanel();
+            setStatus("Controls reset", "waiting");
+            debouncedProcess();
+        });
+
+        updateValueLabels();
+        updateComparisonSlider();
+        resetInfoPanel();
+        setStatus("Waiting for image", "waiting");
+    </script>
+</body>
+</html>
